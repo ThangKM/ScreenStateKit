@@ -1,26 +1,26 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "ScreenStatetKit",
+    name: "ScreenStateKit",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
-            name: "ScreenStatetKit",
-            targets: ["ScreenStatetKit"]),
+            name: "ScreenStateKit",
+            targets: ["ScreenStateKit"]),
     ],
     targets: [
         .target(
-            name: "ScreenStatetKit"
+            name: "ScreenStateKit"
         ),
         .testTarget(
-            name: "ScreenStatetKitTests",
+            name: "ScreenStateKitTests",
             dependencies: [
-                "ScreenStatetKit"
+                "ScreenStateKit"
             ]
         ),
     ]

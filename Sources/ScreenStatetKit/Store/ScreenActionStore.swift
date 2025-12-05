@@ -7,7 +7,7 @@
 
 import Foundation
 
-@available(macOS 10.15, *)
+
 public protocol ScreenActionStore: ObservableObject, TypeNamed, Actor {
     
     associatedtype ScreenState: ScreenStates

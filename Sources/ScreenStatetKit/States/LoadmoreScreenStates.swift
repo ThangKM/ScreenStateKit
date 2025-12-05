@@ -8,7 +8,7 @@ import SwiftUI
 import Combine
 
 //MARK: - Loadmore Screen States
-@available(macOS 10.15, *)
+
 open class LoadmoreScreenStates: ScreenStates {
     
     @Published public private(set) var canShowLoadmore: Bool = false

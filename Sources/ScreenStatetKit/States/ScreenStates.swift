@@ -1,12 +1,12 @@
 import SwiftUI
 import Combine
+import Observation
 
 //MARK: - Base Screen States
-@available(macOS 10.15, *)
 @MainActor
-open class ScreenStates: ObservableObject, Sendable {
+@Observable
+open class ScreenStates: Sendable {
     
-    @Published
     public var isLoading: Bool = false {
         didSet {
             guard parentStateOption.contains(.loading) else { return }
@@ -18,7 +18,6 @@ open class ScreenStates: ObservableObject, Sendable {
         }
     }
     
-    @Published
     public var displayError: RMDisplayableError? {
         didSet {
             if let displayError {

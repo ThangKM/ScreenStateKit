@@ -10,7 +10,7 @@ import SwiftUI
 
 //MARK: - Actions
 
-@available(macOS 10.15, *)
+
 extension View {
     public func onEdited(_ action: @escaping @Sendable @MainActor () async -> Void) -> some View {
         environment(\.onEditedAction, .init(action))
@@ -25,7 +25,7 @@ extension View {
     }
 }
 
-@available(macOS 10.15, *)
+
 extension EnvironmentValues {
     @Entry public var onEditedAction: AsyncActionVoid? = nil
     @Entry public var onDeletedAction: AsyncActionVoid? = nil

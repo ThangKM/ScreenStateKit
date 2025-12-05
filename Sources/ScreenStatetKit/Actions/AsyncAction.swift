@@ -38,7 +38,7 @@ extension AsyncAction where Input == Void {
     }
 }
 
-@available(macOS 10.15, *)
+
 extension AsyncAction where Output == Void {
     
     public func execute(_ input: Input) {
@@ -48,7 +48,7 @@ extension AsyncAction where Output == Void {
     }
 }
 
-@available(macOS 10.15, *)
+
 extension AsyncAction where Output == Void, Input == Void {
     
     public func execute() {

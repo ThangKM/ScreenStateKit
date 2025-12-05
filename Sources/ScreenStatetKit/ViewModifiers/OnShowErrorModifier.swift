@@ -5,8 +5,6 @@
 //  Created by Anthony on 4/12/25.
 //
 import SwiftUI
-
-@available(macOS 10.15, *)
 struct OnShowErrorModifier: ViewModifier {
     
     @State private var isPresentAlert: Bool = false
@@ -25,18 +23,22 @@ struct OnShowErrorModifier: ViewModifier {
                     .font(.footnote)
                     .foregroundStyle(Color.primary)
             }
-            .onChange(of: isPresentAlert, perform: { newValue in
-                guard !newValue else { return }
-                error = .none
-            })
-            .onChange(of: error) { newValue in
-                guard newValue != nil && !isPresentAlert else { return }
-                self.isPresentAlert = true
+            .onChange(of: isPresentAlert) {
+                // When the alert is dismissed, reset the error.
+                if !isPresentAlert {
+                    error = nil
+                }
+            }
+            .onChange(of: error) {
+                // When a new error is set, show the alert.
+                if error != nil && !isPresentAlert {
+                    isPresentAlert = true
+                }
             }
     }
 }
 
-@available(macOS 10.15, *)
+
 extension View {
     public func onShowError(_ error: Binding<RMDisplayableError?>) -> some View {
         modifier(OnShowErrorModifier(error: error))
