@@ -10,7 +10,6 @@ import SwiftUI
 
 //MARK: - Actions
 
-
 extension View {
     public func onEdited(_ action: @escaping @Sendable @MainActor () async -> Void) -> some View {
         environment(\.onEditedAction, .init(action))
@@ -23,6 +22,10 @@ extension View {
     public func onCreated(_ action: @escaping @Sendable @MainActor () async -> Void) -> some View {
         environment(\.onCreatedAction, .init(action))
     }
+    
+    public func onCancelled(_ action: @escaping @Sendable @MainActor () async -> Void) -> some View {
+        environment(\.onCancelledAction, .init(action))
+    }
 }
 
 
@@ -30,4 +33,5 @@ extension EnvironmentValues {
     @Entry public var onEditedAction: AsyncActionVoid? = nil
     @Entry public var onDeletedAction: AsyncActionVoid? = nil
     @Entry public var onCreatedAction: AsyncActionVoid? = nil
+    @Entry public var onCancelledAction: AsyncActionVoid? = nil
 }
