@@ -6,7 +6,7 @@ A comprehensive Swift state management and UI toolkit for iOS 17+ applications b
 
 ## Sample Project
 
-Check out the [WordLearner](https://github.com/anthony1810/WordLearner) app for a real-world example of ScreenStateKit in action.
+Check out the [Definery](https://github.com/anthony1810/Definery) app for a real-world example of ScreenStateKit in action.
 
 ## Table of Contents
 
