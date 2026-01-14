@@ -60,6 +60,31 @@ struct CancelBagTests {
         #expect(task1.isCancelled == true)
         #expect(task2.isCancelled == false)
     }
+
+    // MARK: - store() Tests
+
+    @Test("store with same identifier cancels previous task")
+    func test_store_withSameIdentifierCancelsPreviousTask() async throws {
+        let sut = CancelBag()
+
+        let task1 = Task {
+            try await Task.sleep(for: .seconds(10))
+        }
+        let task2 = Task {
+            try await Task.sleep(for: .seconds(10))
+        }
+
+        task1.store(in: sut, withIdentifier: "sameId")
+
+        try await Task.sleep(for: .milliseconds(50))
+
+        task2.store(in: sut, withIdentifier: "sameId")
+
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(task1.isCancelled == true)
+        #expect(task2.isCancelled == false)
+    }
 }
 
 // MARK: - Helpers
