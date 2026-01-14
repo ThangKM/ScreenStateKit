@@ -41,6 +41,16 @@ struct ScreenStateTests {
 
         #expect(sut.isLoading == false)
     }
+
+    @Test("loadingFinished does not decrement below zero")
+    func test_loadingFinished_doesNotDecrementBelowZero() {
+        let sut = makeSUT()
+
+        sut.loadingFinished()
+        sut.loadingFinished()
+
+        #expect(sut.isLoading == false)
+    }
 }
 
 // MARK: - Helpers
