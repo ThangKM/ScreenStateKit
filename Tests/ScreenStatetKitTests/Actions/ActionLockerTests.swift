@@ -68,6 +68,24 @@ struct ActionLockerTests {
 
         #expect(result == false)
     }
+
+    // MARK: - free() Tests
+
+    @Test("free clears all locks")
+    func test_free_clearsAllLocks() async throws {
+        let sut = makeSUT()
+
+        try await sut.lock(TestAction.fetch)
+        try await sut.lock(TestAction.loadMore)
+
+        await sut.free()
+
+        let canExecuteFetch = await sut.canExecute(TestAction.fetch)
+        let canExecuteLoadMore = await sut.canExecute(TestAction.loadMore)
+
+        #expect(canExecuteFetch == true)
+        #expect(canExecuteLoadMore == true)
+    }
 }
 // MARK: - Helpers
 
