@@ -41,6 +41,21 @@ struct ActionLockerTests {
 
         try await sut.lock(action)
     }
+
+    // MARK: - canExecute() Tests
+
+    @Test("canExecute returns true and locks for new action")
+    func test_canExecute_returnsTrueAndLocksForNewAction() async {
+        let sut = makeSUT()
+        let action = TestAction.fetch
+
+        let result = await sut.canExecute(action)
+
+        #expect(result == true)
+
+        let secondResult = await sut.canExecute(action)
+        #expect(secondResult == false)
+    }
 }
 // MARK: - Helpers
 
