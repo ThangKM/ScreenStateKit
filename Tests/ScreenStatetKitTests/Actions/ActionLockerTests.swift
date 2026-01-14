@@ -28,6 +28,19 @@ struct ActionLockerTests {
 
         try await sut.lock(TestAction.fetch)
     }
+
+    // MARK: - unlock() Tests
+
+    @Test("unlock releases locked action allowing it to be locked again")
+    func test_unlock_releasesLockedAction() async throws {
+        let sut = makeSUT()
+        let action = TestAction.fetch
+
+        try await sut.lock(action)
+        await sut.unlock(action)
+
+        try await sut.lock(action)
+    }
 }
 // MARK: - Helpers
 
