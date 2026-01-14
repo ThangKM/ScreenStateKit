@@ -77,6 +77,20 @@ struct ScreenStateTests {
         sut.loadingStarted(action: TestAction.nonTrackable)
         #expect(sut.isLoading == false)
     }
+
+    // MARK: - loadingFinished(action:) Tests
+
+    @Test("loadingFinished with action only decrements when canTrackLoading is true")
+    func test_loadingFinishedWithAction_onlyDecrementsWhenCanTrackLoading() {
+        let sut = makeSUT()
+
+        sut.loadingStarted()
+        sut.loadingFinished(action: TestAction.nonTrackable)
+        #expect(sut.isLoading == true)
+
+        sut.loadingFinished(action: TestAction.trackable)
+        #expect(sut.isLoading == false)
+    }
 }
 
 // MARK: - Helpers
