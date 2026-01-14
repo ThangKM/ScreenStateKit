@@ -18,6 +18,17 @@ struct ScreenStateTests {
 
         #expect(sut.isLoading == false)
     }
+
+    // MARK: - loadingStarted() Tests
+
+    @Test("loadingStarted sets isLoading to true")
+    func test_loadingStarted_setsIsLoadingToTrue() {
+        let sut = makeSUT()
+
+        sut.loadingStarted()
+
+        #expect(sut.isLoading == true)
+    }
 }
 
 // MARK: - Helpers
