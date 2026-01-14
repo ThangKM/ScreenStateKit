@@ -8,6 +8,7 @@ import Testing
 
 @Suite("ActionLocker Tests")
 struct ActionLockerTests {
+    
     // MARK: - lock() Tests
 
     @Test("lock throws error when action is already locked")
@@ -50,11 +51,22 @@ struct ActionLockerTests {
         let action = TestAction.fetch
 
         let result = await sut.canExecute(action)
-
         #expect(result == true)
 
         let secondResult = await sut.canExecute(action)
         #expect(secondResult == false)
+    }
+
+    @Test("canExecute returns false for already locked action")
+    func test_canExecute_returnsFalseForAlreadyLockedAction() async throws {
+        let sut = makeSUT()
+        let action = TestAction.fetch
+
+        try await sut.lock(action)
+
+        let result = await sut.canExecute(action)
+
+        #expect(result == false)
     }
 }
 // MARK: - Helpers
