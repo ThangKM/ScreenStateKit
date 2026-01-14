@@ -34,6 +34,32 @@ struct CancelBagTests {
         #expect(task1.isCancelled == true)
         #expect(task2.isCancelled == true)
     }
+
+    // MARK: - cancel(forIdentifier:) Tests
+
+    @Test("cancel for identifier cancels specific task")
+    func test_cancelForIdentifier_cancelsSpecificTask() async throws {
+        let sut = CancelBag()
+
+        let task1 = Task {
+            try await Task.sleep(for: .seconds(10))
+        }
+        let task2 = Task {
+            try await Task.sleep(for: .seconds(10))
+        }
+
+        task1.store(in: sut, withIdentifier: "task1")
+        task2.store(in: sut, withIdentifier: "task2")
+
+        try await Task.sleep(for: .milliseconds(50))
+
+        await sut.cancel(forIdentifier: "task1")
+
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(task1.isCancelled == true)
+        #expect(task2.isCancelled == false)
+    }
 }
 
 // MARK: - Helpers
