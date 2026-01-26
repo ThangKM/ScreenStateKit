@@ -38,7 +38,7 @@ public struct StateUpdater<Root, Value>: Sendable where Value: Sendable {
     public let keypath: KeyPathGetter
     public let value: Value
     
-    public init(keypath: @escaping KeyPathGetter,
+    public init(keypath: @escaping @autoclosure KeyPathGetter,
                 value: Value) {
         self.keypath = keypath
         self.value = value
