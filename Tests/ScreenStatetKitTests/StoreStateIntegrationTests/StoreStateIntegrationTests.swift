@@ -9,6 +9,12 @@ import ConcurrencyExtras
 import ScreenStateKit
 
 class StoreStateIntegrationTests {
+    private var leakTrackers: [MemoryLeakTracker] = []
+
+    deinit {
+        leakTrackers.forEach { $0.verify() }
+    }
+
     // MARK: - Action → State Flow
 
     @Test("receive action updates state via keypath")
@@ -119,18 +125,50 @@ class StoreStateIntegrationTests {
 
 extension StoreStateIntegrationTests {
     @MainActor
-    private func makeSUT() async -> (state: TestScreenState, store: TestStore) {
+    private func makeSUT(
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) async -> (state: TestScreenState, store: TestStore) {
         let state = TestScreenState()
         let store = TestStore()
         await store.binding(state: state)
+        trackForMemoryLeaks(state, sourceLocation: sourceLocation)
+        trackForMemoryLeaks(store, sourceLocation: sourceLocation)
         return (state, store)
     }
 
     @MainActor
-    private func makeLoadmoreSUT() async -> (state: TestLoadmoreState, store: TestLoadmoreStore) {
+    private func makeLoadmoreSUT(
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) async -> (state: TestLoadmoreState, store: TestLoadmoreStore) {
         let state = TestLoadmoreState()
         let store = TestLoadmoreStore()
         await store.binding(state: state)
+        trackForMemoryLeaks(state, sourceLocation: sourceLocation)
+        trackForMemoryLeaks(store, sourceLocation: sourceLocation)
         return (state, store)
+    }
+
+    private func trackForMemoryLeaks(
+        _ instance: AnyObject,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+        leakTrackers.append(MemoryLeakTracker(instance: instance, sourceLocation: sourceLocation))
+    }
+}
+
+// MARK: - MemoryLeakTracker
+
+extension StoreStateIntegrationTests {
+    struct MemoryLeakTracker {
+        weak var instance: AnyObject?
+        var sourceLocation: SourceLocation
+
+        func verify() {
+            #expect(
+                instance == nil,
+                "Expected \(String(describing: instance)) to be deallocated. Potential memory leak",
+                sourceLocation: sourceLocation
+            )
+        }
     }
 }
