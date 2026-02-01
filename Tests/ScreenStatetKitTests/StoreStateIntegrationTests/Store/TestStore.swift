@@ -33,10 +33,18 @@ extension StoreStateIntegrationTests {
                 case .fetchUser(let id):
                     fetchCount += 1
                     await state?.updateState(StateUpdater(keypath: \.userName, value: "User \(id)"))
-                    
+
+                case .fetchUserProfile:
+                    fetchCount += 1
+                    await state?.updateState(
+                        StateUpdater(keypath: \.userName, value: "John Doe"),
+                        StateUpdater(keypath: \.userAge, value: 25),
+                        StateUpdater(keypath: \.userEmail, value: "john@example.com")
+                    )
+
                 case .slowFetch:
                     try await Task.sleep(for: .milliseconds(100))
-                    
+
                 case .failingAction:
                     throw TestError.somethingWentWrong
                 }
@@ -48,22 +56,9 @@ extension StoreStateIntegrationTests {
             await state?.loadingFinished(action: action)
         }
         
-        private func execute(action: Action) async throws {
-            switch action {
-            case .fetchUser(let id):
-                fetchCount += 1
-                await state?.updateState(StateUpdater(keypath: \.userName, value: "User \(id)"))
-                
-            case .slowFetch:
-                try await Task.sleep(for: .milliseconds(100))
-                
-            case .failingAction:
-                throw TestError.somethingWentWrong
-            }
-        }
-        
         enum Action: ActionLockable, LoadingTrackable {
             case fetchUser(id: Int)
+            case fetchUserProfile(id: Int)
             case slowFetch
             case failingAction
 
@@ -73,6 +68,8 @@ extension StoreStateIntegrationTests {
                 switch self {
                 case .fetchUser:
                     return "fetchUser"
+                case .fetchUserProfile:
+                    return "fetchUserProfile"
                 case .slowFetch:
                     return "slowFetch"
                 case .failingAction:

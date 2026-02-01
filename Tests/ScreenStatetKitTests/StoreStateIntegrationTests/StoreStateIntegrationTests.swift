@@ -97,5 +97,21 @@ class StoreStateIntegrationTests {
         #expect(state.canShowLoadmore == false)
     }
 
+    // MARK: - Multi-Property StateUpdater Tests
+
+    @Test("fetch user profile updates multiple properties atomically")
+    @MainActor
+    func test_fetchUserProfile_updatesMultipleProperties() async throws {
+        let state = TestScreenState()
+        let sut = TestStore()
+        await sut.binding(state: state)
+
+        await sut.isolatedReceive(action: .fetchUserProfile(id: 42))
+
+        #expect(state.userName == "John Doe")
+        #expect(state.userAge == 25)
+        #expect(state.userEmail == "john@example.com")
+        #expect(state.isLoading == false)
+    }
 
 }
