@@ -14,9 +14,7 @@ class StoreStateIntegrationTests {
     @Test("receive action updates state via keypath")
     @MainActor
     func test_receiveAction_updatesStateViaKeyPath() async throws {
-        let state = TestScreenState()
-        let sut = TestStore()
-        await sut.binding(state: state)
+        let (state, sut) = await makeSUT()
 
         await sut.isolatedReceive(action: .fetchUser(id: 123))
 
@@ -30,9 +28,7 @@ class StoreStateIntegrationTests {
     @MainActor
     func test_loadingState_tracksActionExecution() async throws {
         await withMainSerialExecutor {
-            let state = TestScreenState()
-            let sut = TestStore()
-            await sut.binding(state: state)
+            let (state, sut) = await makeSUT()
 
             let task = Task { await sut.isolatedReceive(action: .slowFetch) }
             await Task.yield()
@@ -49,15 +45,13 @@ class StoreStateIntegrationTests {
     @MainActor
     func test_actionLocker_preventsDuplicateExecution() async throws {
         await withMainSerialExecutor {
-            let state = TestScreenState()
-            let sut = TestStore()
-            await sut.binding(state: state)
-            
+            let (state, sut) = await makeSUT()
+
             sut.receive(action: .fetchUser(id: 1))
             sut.receive(action: .fetchUser(id: 2))
-            
+
             await Task.megaYield()
-            
+
             #expect(state.userName == "User 1")
             #expect(await sut.fetchCount == 1)
         }
@@ -68,9 +62,7 @@ class StoreStateIntegrationTests {
     @Test("error action sets displayError on state")
     @MainActor
     func test_errorAction_setsDisplayError() async throws {
-        let state = TestScreenState()
-        let sut = TestStore()
-        await sut.binding(state: state)
+        let (state, sut) = await makeSUT()
 
         await sut.isolatedReceive(action: .failingAction)
 
@@ -83,15 +75,13 @@ class StoreStateIntegrationTests {
     @Test("loadmore view triggers canExecuteLoadmore on disappear simulation")
     @MainActor
     func test_loadmoreView_triggersCanExecuteLoadmore() async throws {
-        let state = TestLoadmoreState()
-        let viewModel = TestLoadmoreStore()
-        await viewModel.binding(state: state)
+        let (state, sut) = await makeLoadmoreSUT()
 
         state.simulateLoadmoreViewDisappear()
 
         #expect(state.canShowLoadmore == true)
 
-        await viewModel.isolatedReceive(action: .loadMore)
+        await sut.isolatedReceive(action: .loadMore)
 
         #expect(state.items.count == 10)
         #expect(state.canShowLoadmore == false)
@@ -102,9 +92,7 @@ class StoreStateIntegrationTests {
     @Test("fetch user profile updates multiple properties atomically")
     @MainActor
     func test_fetchUserProfile_updatesMultipleProperties() async throws {
-        let state = TestScreenState()
-        let sut = TestStore()
-        await sut.binding(state: state)
+        let (state, sut) = await makeSUT()
 
         await sut.isolatedReceive(action: .fetchUserProfile(id: 42))
 
@@ -117,15 +105,32 @@ class StoreStateIntegrationTests {
     @Test("loadmore with pagination updates items, page, and hasMore atomically")
     @MainActor
     func test_loadMoreWithPagination_updatesMultipleProperties() async throws {
-        let state = TestLoadmoreState()
-        let viewModel = TestLoadmoreStore()
-        await viewModel.binding(state: state)
+        let (state, sut) = await makeLoadmoreSUT()
 
-        await viewModel.isolatedReceive(action: .loadMoreWithPagination(page: 2))
+        await sut.isolatedReceive(action: .loadMoreWithPagination(page: 2))
 
         #expect(state.items == Array(11...20))
         #expect(state.currentPage == 2)
         #expect(state.hasMorePages == true)
     }
+}
 
+// MARK: - Helpers
+
+extension StoreStateIntegrationTests {
+    @MainActor
+    private func makeSUT() async -> (state: TestScreenState, store: TestStore) {
+        let state = TestScreenState()
+        let store = TestStore()
+        await store.binding(state: state)
+        return (state, store)
+    }
+
+    @MainActor
+    private func makeLoadmoreSUT() async -> (state: TestLoadmoreState, store: TestLoadmoreStore) {
+        let state = TestLoadmoreState()
+        let store = TestLoadmoreStore()
+        await store.binding(state: state)
+        return (state, store)
+    }
 }
