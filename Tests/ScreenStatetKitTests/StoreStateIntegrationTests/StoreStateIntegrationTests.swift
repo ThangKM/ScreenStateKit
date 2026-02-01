@@ -78,4 +78,24 @@ class StoreStateIntegrationTests {
         #expect(state.isLoading == false)
     }
 
+    // MARK: - LoadmoreScreenStates Integration Tests
+
+    @Test("loadmore view triggers canExecuteLoadmore on disappear simulation")
+    @MainActor
+    func test_loadmoreView_triggersCanExecuteLoadmore() async throws {
+        let state = TestLoadmoreState()
+        let viewModel = TestLoadmoreStore()
+        await viewModel.binding(state: state)
+
+        state.simulateLoadmoreViewDisappear()
+
+        #expect(state.canShowLoadmore == true)
+
+        await viewModel.isolatedReceive(action: .loadMore)
+
+        #expect(state.items.count == 10)
+        #expect(state.canShowLoadmore == false)
+    }
+
+
 }

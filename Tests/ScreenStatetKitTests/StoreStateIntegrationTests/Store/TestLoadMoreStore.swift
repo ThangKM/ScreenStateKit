@@ -21,7 +21,7 @@ extension StoreStateIntegrationTests {
             Task { await isolatedReceive(action: action) }
         }
         
-        private func isolatedReceive(action: Action) async {
+        func isolatedReceive(action: Action) async {
             guard await actionLocker.canExecute(action) else { return }
             await state?.loadingStarted(action: action)
             
