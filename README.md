@@ -129,7 +129,7 @@ final class FeatureViewState: ScreenState {
 import Foundation
 import ScreenStateKit
 
-actor FeatureViewModel: ScreenActionStore {
+actor FeatureViewStore: ScreenActionStore {
     // MARK: - Dependencies
     private let dataService: DataServiceProtocol
 
@@ -213,10 +213,10 @@ import ScreenStateKit
 struct FeatureView: View {
     // MARK: - State
     @State private var viewState: FeatureViewState
-    @State private var viewModel: FeatureViewModel
+    @State private var viewModel: FeatureViewStore
 
     // MARK: - Init
-    init(viewState: FeatureViewState, viewModel: FeatureViewModel) {
+    init(viewState: FeatureViewState, viewModel: FeatureViewStore) {
         self.viewState = viewState
         self.viewModel = viewModel
     }
