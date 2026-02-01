@@ -14,6 +14,9 @@ let package = Package(
             name: "ScreenStateKit",
             targets: ["ScreenStateKit"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
+    ],
     targets: [
         .target(
             name: "ScreenStateKit",
@@ -22,7 +25,8 @@ let package = Package(
         .testTarget(
             name: "ScreenStateKitTests",
             dependencies: [
-                "ScreenStateKit"
+                "ScreenStateKit",
+                .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
             ],
             path: "Tests/ScreenStatetKitTests",
             exclude: ["ScreenStateKit.xctestplan"]
