@@ -204,12 +204,12 @@ import ScreenStateKit
 struct FeatureView: View {
     // MARK: - State
     @State private var viewState: FeatureViewState
-    @State private var viewModel: FeatureViewStore
+    @State private var viewStore: FeatureViewStore
 
     // MARK: - Init
-    init(viewState: FeatureViewState, viewModel: FeatureViewStore) {
+    init(viewState: FeatureViewState, viewStore: FeatureViewStore) {
         self.viewState = viewState
-        self.viewModel = viewModel
+        self.viewStore = viewStore
     }
 
     // MARK: - Body
@@ -223,11 +223,11 @@ struct FeatureView: View {
         .onShowLoading($viewState.isLoading)
         .onShowError($viewState.displayError)
         .task {
-            // Critical: Bind state to viewModel
-            await viewModel.binding(state: viewState)
+            // Critical: Bind state to viewStore
+            await viewStore.binding(state: viewState)
 
             // Initial data fetch
-            viewModel.receive(action: .fetchItems)
+            viewStore.receive(action: .fetchItems)
         }
     }
 
@@ -252,12 +252,12 @@ struct FeatureView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .onAppear {
-                        viewModel.receive(action: .loadMore)
+                        viewStore.receive(action: .loadMore)
                     }
             }
         }
         .refreshable {
-            try? await viewModel.isolatedReceive(action: .fetchItems)
+            try? await viewStore.isolatedReceive(action: .fetchItems)
         }
     }
 
