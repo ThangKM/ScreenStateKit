@@ -1,6 +1,12 @@
 # ScreenStateKit
 
-A comprehensive Swift state management and UI toolkit for iOS 17+ applications built with SwiftUI. This framework provides reactive state containers, async action handling, task lifecycle management, and pre-built UI components for common patterns like loading states, error handling, and pagination.
+[![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
+[![iOS](https://img.shields.io/badge/iOS-17+-blue.svg)](https://developer.apple.com/ios/)
+[![macOS](https://img.shields.io/badge/macOS-14+-blue.svg)](https://developer.apple.com/macos/)
+[![Tests](https://github.com/anthony1810/ScreenStateKit/actions/workflows/tests.yml/badge.svg)](https://github.com/anthony1810/ScreenStateKit/actions/workflows/tests.yml)
+[![Fully Tested](https://img.shields.io/badge/coverage-fully%20tested-brightgreen)](https://github.com/anthony1810/ScreenStateKit/tree/main/Tests)
+
+A comprehensive, fully tested Swift state management and UI toolkit for iOS 17+ applications built with SwiftUI. This framework provides reactive state containers, async action handling, task lifecycle management, and pre-built UI components for common patterns like loading states, error handling, and pagination.
 
 **Main Contributor:** [@ThangKM](https://github.com/ThangKM)
 
@@ -95,25 +101,12 @@ import ScreenStateKit
 import Observation
 
 @Observable @MainActor
-final class FeatureViewState: ScreenState {
+final class FeatureViewState: LoadmoreScreenState, StateUpdatable {
     // UI Configuration
     let headerHeight: CGFloat = 120.0
 
     // Data State
-    private(set) var items: [Item] = []
-    private(set) var shouldShowLoadMore: Bool = false
-
-    /// Safe property update helper
-    func tryUpdate<T>(
-        property: @autoclosure @MainActor () -> KeyPath<FeatureViewState, T>,
-        newValue: T
-    ) {
-        guard let keypath = property() as? ReferenceWritableKeyPath<FeatureViewState, T> else {
-            assertionFailure("Read-only property")
-            return
-        }
-        self[keyPath: keypath] = newValue
-    }
+    var items: [Item] = []
 }
 ```
 
@@ -123,7 +116,7 @@ final class FeatureViewState: ScreenState {
 import Foundation
 import ScreenStateKit
 
-actor FeatureViewModel: ScreenActionStore {
+actor FeatureViewStore: ScreenActionStore {
     // MARK: - Dependencies
     private let dataService: DataServiceProtocol
 
@@ -187,13 +180,17 @@ actor FeatureViewModel: ScreenActionStore {
     // MARK: - Action Implementations
     private func fetchItems() async throws {
         let result = try await dataService.fetchItems(page: 1, limit: 20)
-        await viewState?.tryUpdate(property: \.items, newValue: result.items)
+        await viewState?.updateState { state in
+            state.items = result.items
+        }
     }
 
     private func loadMoreItems() async throws {
+        let currentItems = await viewState?.items ?? []
         let result = try await dataService.fetchItems(page: 2, limit: 20)
-        let allItems = (await viewState?.items ?? []) + result.items
-        await viewState?.tryUpdate(property: \.items, newValue: allItems)
+        await viewState?.updateState { state in
+            state.items = currentItems + result.items
+        }
     }
 }
 ```
@@ -207,12 +204,12 @@ import ScreenStateKit
 struct FeatureView: View {
     // MARK: - State
     @State private var viewState: FeatureViewState
-    @State private var viewModel: FeatureViewModel
+    @State private var viewStore: FeatureViewStore
 
     // MARK: - Init
-    init(viewState: FeatureViewState, viewModel: FeatureViewModel) {
+    init(viewState: FeatureViewState, viewStore: FeatureViewStore) {
         self.viewState = viewState
-        self.viewModel = viewModel
+        self.viewStore = viewStore
     }
 
     // MARK: - Body
@@ -226,11 +223,11 @@ struct FeatureView: View {
         .onShowLoading($viewState.isLoading)
         .onShowError($viewState.displayError)
         .task {
-            // Critical: Bind state to viewModel
-            await viewModel.binding(state: viewState)
+            // Critical: Bind state to viewStore
+            await viewStore.binding(state: viewState)
 
             // Initial data fetch
-            viewModel.receive(action: .fetchItems)
+            viewStore.receive(action: .fetchItems)
         }
     }
 
@@ -251,16 +248,16 @@ struct FeatureView: View {
             }
 
             // Load more indicator
-            if viewState.shouldShowLoadMore {
+            if !viewState.items.isEmpty && viewState.canShowLoadmore {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .onAppear {
-                        viewModel.receive(action: .loadMore)
+                        viewStore.receive(action: .loadMore)
                     }
             }
         }
         .refreshable {
-            try? await viewModel.isolatedReceive(action: .fetchItems)
+            try? await viewStore.isolatedReceive(action: .fetchItems)
         }
     }
 
