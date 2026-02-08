@@ -162,26 +162,26 @@ actor FeatureViewStore: ScreenActionStore {
 
     nonisolated func receive(action: Action) {
         Task {
-            do {
-                try await isolatedReceive(action: action)
-            } catch {
-                await viewState?.showError(
-                    RMDisplayableError(message: error.localizedDescription)
-                )
-            }
+            await isolatedReceive(action: action)
         }
     }
 
     // MARK: - Action Processing
-    func isolatedReceive(action: Action) async throws {
+    func isolatedReceive(action: Action) async {
         guard await actionLocker.canExecute(action) else { return }
         await viewState?.loadingStarted(action: action)
 
-        switch action {
-        case .fetchItems:
-            try await fetchItems()
-        case .loadMore:
-            try await loadMoreItems()
+        do {
+            switch action {
+            case .fetchItems:
+                try await fetchItems()
+            case .loadMore:
+                try await loadMoreItems()
+            }
+        } catch {
+            await viewState?.showError(
+                RMDisplayableError(message: error.localizedDescription)
+            )
         }
 
         await actionLocker.unlock(action)
